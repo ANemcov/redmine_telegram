@@ -10,7 +10,7 @@ class TelegramListener < Redmine::Hook::Listener
 		return unless channel and url
 		return if issue.is_private?
 
-		msg = "[#{escape issue.project}] #{escape issue.author} created <#{object_url issue}|#{escape issue}>#{mentions issue.description}"
+		msg = "*[#{escape issue.project}]* _#{escape issue.author}_ created [#{escape issue}](#{object_url issue})#{mentions issue.description}"
 
 		attachment = {}
 		attachment[:text] = escape issue.description if issue.description
@@ -47,7 +47,7 @@ class TelegramListener < Redmine::Hook::Listener
 		return unless channel and url and Setting.plugin_redmine_telegram[:post_updates] == '1'
 		return if issue.is_private?
 
-		msg = "_[#{escape issue.project}]_ *#{escape journal.user.to_s}* updated [#{escape issue}](#{object_url issue}) #{mentions journal.notes}"
+		msg = "*[#{escape issue.project}]* _#{escape journal.user.to_s}_ updated [#{escape issue}](#{object_url issue}) #{mentions journal.notes}"
 
 		attachment = {}
 		attachment[:text] = escape journal.notes if journal.notes
@@ -67,7 +67,7 @@ class TelegramListener < Redmine::Hook::Listener
 		return unless channel and url and issue.save
 		return if issue.is_private?
 
-		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>"
+		msg = "*[#{escape issue.project}]* _#{escape journal.user.to_s}_ updated [#{escape issue}](#{object_url issue})"
 
 		repository = changeset.repository
 
@@ -82,7 +82,7 @@ class TelegramListener < Redmine::Hook::Listener
 		)
 
 		attachment = {}
-		attachment[:text] = ll(Setting.default_language, :text_status_changed_by_changeset, "<#{revision_url}|#{escape changeset.comments}>")
+		attachment[:text] = ll(Setting.default_language, :text_status_changed_by_changeset, "[#{escape changeset.comments}](#{revision_url})")
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
 		speak msg, channel, attachment, url
@@ -114,7 +114,7 @@ class TelegramListener < Redmine::Hook::Listener
 		if attachment
 			msg = msg +"\r\n"+attachment[:text]
 			for field_item in attachment[:fields] do
-				msg = msg +"\r\n"+"\t*"+field_item[:title]+":* "+field_item[:value]
+				msg = msg +"\r\n"+"> *"+field_item[:title]+":* "+field_item[:value]
 			end
 		end
 
@@ -133,7 +133,7 @@ class TelegramListener < Redmine::Hook::Listener
 
 private
 	def escape(msg)
-		msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;")
+		msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;").gsub("[", "\[").gsub("]", "\]")
 	end
 
 	def object_url(obj)
