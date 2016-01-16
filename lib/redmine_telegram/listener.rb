@@ -111,7 +111,7 @@ class TelegramListener < Redmine::Hook::Listener
 		# 	end
 		# end
 		
-		params[:text] = "*"+msg+"*"
+		params[:text] = msg
 		
 		begin
 			client = HTTPClient.new
