@@ -5,7 +5,7 @@ require_dependency 'redmine_telegram/listener'
 Redmine::Plugin.register :redmine_telegram do
 	name 'Redmine Telegram'
 	author 'Alex Nemtsov aka pythonchik'
-	url 'https://github.com/sciyoshi/redmine-slack'
+	url 'https://github.com/ANemcov/redmine-telegram'
 	author_url 'http://cmd-q.ru'
 	description 'Telegram chat integration'
 	version '0.1'
