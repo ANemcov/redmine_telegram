@@ -93,7 +93,7 @@ class TelegramListener < Redmine::Hook::Listener
 		username = Setting.plugin_redmine_telegram[:username]
 		icon = Setting.plugin_redmine_telegram[:icon]
 
-		telegram_url = Setting.plugin_redmine_telegram[:callback_url]+url+"/sendMessage"
+		telegram_url = 'https://api.telegram.org/bot'+url+"/sendMessage"
 
 		params = {}
 		
