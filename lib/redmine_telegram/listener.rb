@@ -93,7 +93,7 @@ class TelegramListener < Redmine::Hook::Listener
 		username = Setting.plugin_redmine_telegram[:username]
 		icon = Setting.plugin_redmine_telegram[:icon]
 
-		telegram_url
+		telegram_url = Setting.plugin_redmine_telegram[:callback_url]+url+"/sendMessage"
 
 		params = {}
 		
@@ -111,7 +111,7 @@ class TelegramListener < Redmine::Hook::Listener
 		# 	end
 		# end
 		
-		params[:text] = msg
+		params[:text] = "*"+msg+"*"
 		
 		begin
 			client = HTTPClient.new
