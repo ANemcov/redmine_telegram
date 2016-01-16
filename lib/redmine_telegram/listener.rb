@@ -111,6 +111,13 @@ class TelegramListener < Redmine::Hook::Listener
 		# 	end
 		# end
 		
+		if attachment
+			msg = msg +"\r\n"+attachment[:text]
+			for field_item in attachment[:fields] do
+				msg = msg +"\r\n"+"\t*"field_item[:title]+":* "+field_item[:value]
+			end
+		end
+
 		params[:text] = msg
 		
 		begin
