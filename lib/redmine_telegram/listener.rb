@@ -38,7 +38,7 @@ class TelegramListener < Redmine::Hook::Listener
 	end
 
 	def controller_issues_edit_after_save(context={})
-		debug("test==test")
+		Rails.logger.info("TEST")
 
 		issue = context[:issue]
 		journal = context[:journal]
