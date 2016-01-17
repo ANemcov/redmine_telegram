@@ -50,8 +50,8 @@ class TelegramListener < Redmine::Hook::Listener
 		msg = "*[#{escape issue.project}]* _#{escape journal.user.to_s}_ uPdated [#{escape issue}](#{object_url issue})"
 
 		attachment = {}
-		attachment[:text] = escape journal.notes if journal.notes
-		attachment[:fields] = journal.details.map { |d| detail_to_field d }
+		# attachment[:text] = escape journal.notes if journal.notes
+		# attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
 		speak msg, channel, attachment, url
 	end
@@ -107,9 +107,9 @@ class TelegramListener < Redmine::Hook::Listener
 		speak msg, channel, attachment, url
 	end
 	
-	def controller_issues_bulk_edit_before_save(context={})
-		controller_issues_edit_before_save context
-	end
+	# def controller_issues_bulk_edit_before_save(context={})
+	# 	controller_issues_edit_before_save context
+	# end
 
 	def speak(msg, channel, attachment=nil, url=nil)
 		url = Setting.plugin_redmine_telegram[:telegram_bot_token] if not url
