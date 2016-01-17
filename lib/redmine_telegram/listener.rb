@@ -131,7 +131,7 @@ class TelegramListener < Redmine::Hook::Listener
 		end
 	end
 	
-	alias_method :controller_issues_bulk_edit_before_save, :controller_issues_edit_before_save
+	alias_method :controller_issues_bulk_edit_before_save, :controller_issues_edit_after_save
 
 private
 	def escape(msg)
