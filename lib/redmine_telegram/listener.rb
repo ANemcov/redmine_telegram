@@ -37,25 +37,6 @@ class TelegramListener < Redmine::Hook::Listener
 		speak msg, channel, attachment, url
 	end
 
-	def controller_issues_edit_before_save(context={})
-		issue = context[:issue]
-		# journal = context[:journal]
-
-		channel = channel_for_project issue.project
-		url = url_for_project issue.project
-
-		return unless channel and url
-		return if issue.is_private?
-
-		msg = "*[#{escape issue.project}]* uPdated [#{escape issue}](#{object_url issue})"
-
-		attachment = {}
-		# attachment[:text] = escape journal.notes if journal.notes
-		# attachment[:fields] = journal.details.map { |d| detail_to_field d }
-
-		speak msg, channel, attachment, url
-	end
-
 	def controller_issues_edit_after_save(context={})
 		issue = context[:issue]
 		journal = context[:journal]
@@ -83,7 +64,7 @@ class TelegramListener < Redmine::Hook::Listener
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
 
-		return unless channel and url # and issue.save
+		return unless channel and url and issue.save
 		return if issue.is_private?
 
 		msg = "*[#{escape issue.project}]* _#{escape journal.user.to_s}_ updated [#{escape issue}](#{object_url issue})"
@@ -107,10 +88,6 @@ class TelegramListener < Redmine::Hook::Listener
 		speak msg, channel, attachment, url
 	end
 	
-	# def controller_issues_bulk_edit_before_save(context={})
-	# 	controller_issues_edit_before_save context
-	# end
-
 	def speak(msg, channel, attachment=nil, url=nil)
 		url = Setting.plugin_redmine_telegram[:telegram_bot_token] if not url
 		username = Setting.plugin_redmine_telegram[:username]
@@ -121,11 +98,9 @@ class TelegramListener < Redmine::Hook::Listener
 		params = {}
 		
 
-		# params[:username] = username if username
 		params[:chat_id] = channel if channel
 		params[:parse_mode] = "Markdown"
-		# params[:attachments] = [attachment] if attachment
-
+		
 		# if icon and not icon.empty?
 		# 	if icon.start_with? ':'
 		# 		params[:icon_emoji] = icon
@@ -154,8 +129,7 @@ class TelegramListener < Redmine::Hook::Listener
 		end
 	end
 	
-	alias_method :controller_issues_bulk_edit_before_save, :controller_issues_edit_before_save
-
+	
 private
 	def escape(msg)
 		msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;").gsub("[", "\[").gsub("]", "\]")
