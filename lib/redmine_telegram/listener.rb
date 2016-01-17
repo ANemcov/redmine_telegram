@@ -47,7 +47,7 @@ class TelegramListener < Redmine::Hook::Listener
 		return unless channel and url
 		return if issue.is_private?
 
-		msg = "*[#{escape issue.project}]* _#{escape journal.user.to_s}_ updated [#{escape issue}](#{object_url issue})"
+		msg = "*[#{escape issue.project}]* _#{escape journal.user.to_s}_ uPdated [#{escape issue}](#{object_url issue})"
 
 		attachment = {}
 		attachment[:text] = escape journal.notes if journal.notes
@@ -105,6 +105,15 @@ class TelegramListener < Redmine::Hook::Listener
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
 		speak msg, channel, attachment, url
+	end
+	
+	def controller_issues_bulk_edit_before_save(context={})
+		for context[:ids].each do |item_id|
+			new_context={}
+			new_context[:issue]=Issue.find(item_id) rescue nil
+			new_context[:params]=context[:params]
+			controller_issues_edit_before_save new_context
+		end
 	end
 
 	def speak(msg, channel, attachment=nil, url=nil)
