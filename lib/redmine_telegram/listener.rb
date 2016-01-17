@@ -56,25 +56,6 @@ class TelegramListener < Redmine::Hook::Listener
 		speak msg, channel, attachment, url
 	end
 
-	def controller_issues_bulk_edit_before_save(context={})
-		issue = context[:issue]
-		journal = context[:journal]
-
-		channel = channel_for_project issue.project
-		url = url_for_project issue.project
-
-		return unless channel and url and Setting.plugin_redmine_telegram[:post_updates] == '1'
-		return if issue.is_private?
-
-		msg = "*[#{escape issue.project}]* _#{escape journal.user.to_s}_ updated [#{escape issue}](#{object_url issue}) #{mentions journal.notes}"
-
-		attachment = {}
-		attachment[:text] = escape journal.notes if journal.notes
-		attachment[:fields] = journal.details.map { |d| detail_to_field d }
-
-		speak msg, channel, attachment, url
-	end
-
 	def model_changeset_scan_commit_for_issue_ids_pre_issue_update(context={})
 		issue = context[:issue]
 		journal = issue.current_journal
@@ -149,6 +130,8 @@ class TelegramListener < Redmine::Hook::Listener
 			# Bury exception if connection error
 		end
 	end
+	
+	alias_method :controller_issues_bulk_edit_before_save, :controller_issues_edit_before_save
 
 private
 	def escape(msg)
