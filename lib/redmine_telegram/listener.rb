@@ -1,5 +1,6 @@
 require 'httpclient'
-require 'logger'
+require 'json'
+
 class TelegramListener < Redmine::Hook::Listener
 	def controller_issues_new_after_save(context={})
 		issue = context[:issue]
