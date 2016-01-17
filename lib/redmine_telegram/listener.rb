@@ -108,7 +108,7 @@ class TelegramListener < Redmine::Hook::Listener
 	end
 	
 	def controller_issues_bulk_edit_before_save(context={})
-		for context[:ids].each do |item_id|
+		for item_id in context[:ids] do 
 			new_context={}
 			new_context[:issue]=Issue.find(item_id) rescue nil
 			new_context[:params]=context[:params]
