@@ -108,12 +108,7 @@ class TelegramListener < Redmine::Hook::Listener
 	end
 	
 	def controller_issues_bulk_edit_before_save(context={})
-		for item_id in context[:ids] do 
-			new_context={}
-			new_context[:issue]=Issue.find(item_id) rescue nil
-			new_context[:params]=context[:params]
-			controller_issues_edit_before_save new_context
-		end
+		controller_issues_edit_before_save context
 	end
 
 	def speak(msg, channel, attachment=nil, url=nil)
