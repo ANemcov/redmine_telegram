@@ -1,5 +1,5 @@
 require 'httpclient'
-
+require 'logger'
 class TelegramListener < Redmine::Hook::Listener
 	def controller_issues_new_after_save(context={})
 		issue = context[:issue]
@@ -38,6 +38,8 @@ class TelegramListener < Redmine::Hook::Listener
 	end
 
 	def controller_issues_edit_after_save(context={})
+		debug("test==test")
+
 		issue = context[:issue]
 		journal = context[:journal]
 
