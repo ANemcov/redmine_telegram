@@ -90,6 +90,14 @@ class TelegramListener < Redmine::Hook::Listener
 		speak msg, channel, attachment, url
 	end
 	
+	def controller_issues_bulk_edit_before_save(context={})
+		Rails.logger.info("TEST: "+context.to_json)
+	end
+
+	def controller_journals_edit_post(context={})
+		Rails.logger.info("TEST: "+context.to_json)
+	end
+
 	def speak(msg, channel, attachment=nil, url=nil)
 		url = Setting.plugin_redmine_telegram[:telegram_bot_token] if not url
 		username = Setting.plugin_redmine_telegram[:username]
