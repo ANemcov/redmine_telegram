@@ -47,7 +47,7 @@ class TelegramListener < Redmine::Hook::Listener
 		return unless channel and url
 		return if issue.is_private?
 
-		msg = "*[#{escape issue.project}]* _#{escape journal.user.to_s}_ uPdated [#{escape issue}](#{object_url issue})"
+		msg = "*[#{escape issue.project}]* uPdated [#{escape issue}](#{object_url issue})"
 
 		attachment = {}
 		# attachment[:text] = escape journal.notes if journal.notes
