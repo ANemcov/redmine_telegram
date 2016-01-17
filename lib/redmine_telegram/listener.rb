@@ -92,11 +92,11 @@ class TelegramListener < Redmine::Hook::Listener
 	end
 	
 	def controller_issues_bulk_edit_before_save(context={})
-		Rails.logger.info("TEST: "+context.to_json.to_s)
+		Rails.logger.info("TEST: ")
 	end
 
 	def controller_journals_edit_post(context={})
-		Rails.logger.info("TEST: "+context.to_json.to_s)
+		Rails.logger.info("Journal ")
 	end
 
 	def speak(msg, channel, attachment=nil, url=nil)
