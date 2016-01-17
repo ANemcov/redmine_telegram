@@ -64,7 +64,7 @@ class TelegramListener < Redmine::Hook::Listener
 		channel = channel_for_project issue.project
 		url = url_for_project issue.project
 
-		return unless channel and url and issue.save
+		return unless channel and url # and issue.save
 		return if issue.is_private?
 
 		msg = "*[#{escape issue.project}]* _#{escape journal.user.to_s}_ updated [#{escape issue}](#{object_url issue})"
