@@ -197,7 +197,7 @@ module TelegramMailerPatch
       begin
         text.scan(/@[a-z0-9][a-z0-9_\-]*/).uniq
       rescue
-        # Nothing to scan
+        ""
       end
     end
 
