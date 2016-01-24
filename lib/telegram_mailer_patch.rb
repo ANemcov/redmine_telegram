@@ -72,7 +72,7 @@ module TelegramMailerPatch
     # Adds a rates tab to the user administration page
     def issue_add_with_telegram(issue, to_users, cc_users)
       
-      issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue, :anchor => "change-#{journal.id}")
+      issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue)
       users = to_users + cc_users
       channel = channel_for_project issue.project
       token = token_for_project issue.project
