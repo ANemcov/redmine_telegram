@@ -1,4 +1,4 @@
-require 'httpclient'
+require 'mailer'
 
 class TelegramListener < Redmine::Hook::Listener
 	def controller_issues_new_after_save(context={})
@@ -34,7 +34,7 @@ class TelegramListener < Redmine::Hook::Listener
 			:short => true
 		} if Setting.plugin_redmine_telegram[:display_watchers] == 'yes'
 
-		speak msg, channel, attachment, url
+		Mailer.speak(msg, channel, attachment, url)
 	end
 
 	def controller_issues_edit_after_save(context={})
@@ -55,7 +55,7 @@ class TelegramListener < Redmine::Hook::Listener
 		attachment[:text] = escape journal.notes if journal.notes
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
-		speak msg, channel, attachment, url
+		Mailer.speak(msg, channel, attachment, url)
 	end
 
 	def model_changeset_scan_commit_for_issue_ids_pre_issue_update(context={})
@@ -87,50 +87,8 @@ class TelegramListener < Redmine::Hook::Listener
 		attachment[:text] = ll(Setting.default_language, :text_status_changed_by_changeset, "[#{escape changeset.comments}](#{revision_url})")
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
-		speak msg, channel, attachment, url
+		Mailer.speak(msg, channel, attachment, url)
 	end
-	
-	def speak(msg, channel, attachment=nil, url=nil)
-		url = Setting.plugin_redmine_telegram[:telegram_bot_token] if not url
-		username = Setting.plugin_redmine_telegram[:username]
-		icon = Setting.plugin_redmine_telegram[:icon]
-
-		telegram_url = 'https://api.telegram.org/bot'+url+"/sendMessage"
-
-		params = {}
-		
-
-		params[:chat_id] = channel if channel
-		params[:parse_mode] = "Markdown"
-		
-		# if icon and not icon.empty?
-		# 	if icon.start_with? ':'
-		# 		params[:icon_emoji] = icon
-		# 	else
-		# 		params[:icon_url] = icon
-		# 	end
-		# end
-		
-		if attachment
-			msg = msg +"\r\n"+attachment[:text]
-			for field_item in attachment[:fields] do
-				msg = msg +"\r\n"+"> *"+field_item[:title]+":* "+field_item[:value]
-			end
-		end
-
-		params[:text] = msg
-		
-		begin
-			client = HTTPClient.new
-			# client.ssl_config.cert_store.set_default_paths
-			# client.ssl_config.ssl_version = "SSLv23"
-			# client.post_async url, {:payload => params.to_json}
-			client.post_async(telegram_url, params)
-		rescue
-			# Bury exception if connection error
-		end
-	end
-	
 	
 private
 	def escape(msg)
