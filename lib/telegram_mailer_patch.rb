@@ -117,7 +117,7 @@ module TelegramMailerPatch
       token = token_for_project issue.project
 
       
-      msg = "*[#{iescape issue.project}]* _#{journal.user.to_s}_ updated [#{issue}](#{issue_url}) #{mentions journal.notes}"
+      msg = "*[#{escape issue.project}]* _#{journal.user.to_s}_ updated [#{issue}](#{issue_url}) #{mentions journal.notes}"
       
       attachment = {}
       attachment[:text] = escape journal.notes if journal.notes
