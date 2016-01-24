@@ -83,6 +83,8 @@ module TelegramMailerPatch
       msg = "*[#{issue.project.name}]* _#{journal.user.to_s}_ updated [#{issue.subject}](#{issue_url}) #{mentions journal.notes}"
       
       channel = channel_for_project issue.project
+      url = url_for_project issue.project
+
       attachment = {}
       attachment[:text] = escape journal.notes if journal.notes
       attachment[:fields] = journal.details.map { |d| detail_to_field d }
