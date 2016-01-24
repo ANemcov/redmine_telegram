@@ -22,9 +22,11 @@ module TelegramMailerPatch
       token = Setting.plugin_redmine_telegram[:telegram_bot_token] if not url
       username = Setting.plugin_redmine_telegram[:username]
       icon = Setting.plugin_redmine_telegram[:icon]
-
-      telegram_url = 'https://api.telegram.org/bot'+token+"/sendMessage"
-
+      Rails.logger.info("Token #{token}")
+      Rails.logger.info("username #{username}")
+      Rails.logger.info("icon #{icon}")
+      telegram_url = "https://api.telegram.org/bot#{token}/sendMessage"
+      Rails.logger.info("telegram_url #{telegram_url}")
       params = {}
       
 
