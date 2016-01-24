@@ -18,7 +18,7 @@ module TelegramMailerPatch
   module ClassMethods
     
     def speak(msg, channel, attachment=nil, url=nil)
-      Rails.logger.info("TELEGRAM SPEAK")
+      Rails.logger.info("TELEGRAM SPEAK #{msg} => #{channel}")
       token = Setting.plugin_redmine_telegram[:telegram_bot_token] if not url
       username = Setting.plugin_redmine_telegram[:username]
       icon = Setting.plugin_redmine_telegram[:icon]
