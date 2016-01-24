@@ -1,4 +1,4 @@
-require 'mailer'
+# require 'mailer'
 
 class TelegramListener < Redmine::Hook::Listener
 	def controller_issues_new_after_save(context={})
