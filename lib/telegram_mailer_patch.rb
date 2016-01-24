@@ -16,6 +16,10 @@ module TelegramMailerPatch
   
   module ClassMethods
     
+    def speak(msg, channel, attachment=nil, url=nil)
+      Rails.logger.info("TELEGRAM Class SPEAK")
+    end
+    
   end
   
   module InstanceMethods
