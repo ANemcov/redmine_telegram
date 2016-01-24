@@ -17,19 +17,6 @@ module TelegramMailerPatch
   module ClassMethods
     
     def speak(msg, channel, attachment=nil, url=nil)
-      Rails.logger.info("TELEGRAM Class SPEAK")
-    end
-    
-  end
-  
-  module InstanceMethods
-    # Adds a rates tab to the user administration page
-    def issue_add_with_telegram(issue, to_users, cc_users)
-      Rails.logger.info("TELEGRAM [#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
-      issue_add_without_telegram(issue, to_users, cc_users)
-    end
-    
-    def speak(msg, channel, attachment=nil, url=nil)
       Rails.logger.info("TELEGRAM SPEAK")
       url = Setting.plugin_redmine_telegram[:telegram_bot_token] if not url
       username = Setting.plugin_redmine_telegram[:username]
@@ -69,6 +56,15 @@ module TelegramMailerPatch
       rescue
         # Bury exception if connection error
       end
+    end
+
+  end
+  
+  module InstanceMethods
+    # Adds a rates tab to the user administration page
+    def issue_add_with_telegram(issue, to_users, cc_users)
+      Rails.logger.info("TELEGRAM [#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
+      issue_add_without_telegram(issue, to_users, cc_users)
     end
 
   end
