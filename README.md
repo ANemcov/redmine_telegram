@@ -3,16 +3,12 @@
 This plugin posts updates to issues in your Redmine installation to a Telegram
 channel. Improvements are welcome! Just send a pull request.
 
-## Screenshot
-
-![screenshot](https://raw.github.com/sciyoshi/redmine-Telegram/gh-pages/screenshot.png)
-
 ## Installation
 
-From your Redmine plugins directory, clone this repository as `redmine_Telegram` (note
+From your Redmine plugins directory, clone this repository as `redmine_telegram` (note
 the underscore!):
 
-    git clone https://github.com/sciyoshi/redmine-Telegram.git redmine_Telegram
+    git clone https://github.com/sciyoshi/redmine-telegram.git redmine_telegram
 
 You will also need the `httpclient` dependency, which can be installed by running
 
@@ -20,9 +16,12 @@ You will also need the `httpclient` dependency, which can be installed by runnin
 
 from the plugin directory.
 
+Start mmigration command
+
+	rake redmine:plugins:migrate RAILS_ENV=production
+
 Restart Redmine, and you should see the plugin show up in the Plugins page.
-Under the configuration options, set the Telegram API URL to the URL for an
-Incoming WebHook integration in your Telegram account.
+Under the configuration options, set the "Telegram Bot Token" and default "Telegram Channel ID". For details see [Telegram BOT API](https://core.telegram.org/bots/API)
 
 ## Customized Routing
 
@@ -31,5 +30,15 @@ do this, create a project custom field (Administration > Custom fields > Project
 named `Telegram Channel`. If no custom channel is defined for a project, the parent
 project will be checked (or the default will be used). To prevent all notifications
 from being sent for a project, set the custom channel to `-`.
+
+## Uninstall
+
+From Redmine plugin directory run command
+
+	rake redmine:plugins:migrate NAME=redmine_telegram VERSION=0 RAILS_ENV=production
+
+After that restart Redmine.
+
+
 
 For more information, see http://www.redmine.org/projects/redmine/wiki/Plugins.
