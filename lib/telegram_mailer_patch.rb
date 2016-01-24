@@ -19,4 +19,4 @@ module TelegramMailerPatch
   end
 end
 
-Mailer.send(:include, RateUsersHelperPatch)
+Mailer.send(:include, TelegramMailerPatch)
