@@ -8,7 +8,7 @@ module TelegramMailerPatch
     base.send(:include, InstanceMethods)
 
     base.class_eval do
-      alias_method_chain :deliver_issue_add, :telegram
+      alias_method_chain :issue_add, :telegram
     end
   end
   
@@ -18,9 +18,9 @@ module TelegramMailerPatch
   
   module InstanceMethods
     # Adds a rates tab to the user administration page
-    def deliver_issue_add_with_telegram(issue)
+    def issue_add_with_telegram(issue, to_users, cc_users)
       Rails.logger.info("[#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
-      deliver_issue_add_with_telegram(issue)
+      issue_add_without_telegram(issue, to_users, cc_users)
     end
     
   end
