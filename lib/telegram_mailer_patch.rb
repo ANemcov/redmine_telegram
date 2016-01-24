@@ -71,8 +71,39 @@ module TelegramMailerPatch
   module InstanceMethods
     # Adds a rates tab to the user administration page
     def issue_add_with_telegram(issue, to_users, cc_users)
-      msg = "*[#{escape issue.project}]* _#{escape issue.author}_ created [#{escape issue}](#{object_url issue})#{mentions issue.description}"
+      
+      issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue, :anchor => "change-#{journal.id}")
+      users = to_users + cc_users
+      channel = channel_for_project issue.project
+      token = token_for_project issue.project
+
+      msg = "*[#{escape issue.project}]* _#{escape issue.author}_ created [#{escape issue}](#{issue_url})#{mentions issue.description}"
       Rails.logger.info("TELEGRAM Add Issue [#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
+      
+      attachment = {}
+      attachment[:text] = escape issue.description if issue.description
+      attachment[:fields] = [{
+        :title => I18n.t("field_status"),
+        :value => escape(issue.status.to_s),
+        :short => true
+      }, {
+        :title => I18n.t("field_priority"),
+        :value => escape(issue.priority.to_s),
+        :short => true
+      }, {
+        :title => I18n.t("field_assigned_to"),
+        :value => escape(issue.assigned_to.to_s),
+        :short => true
+      }]
+
+      attachment[:fields] << {
+        :title => I18n.t("field_watcher"),
+        :value => escape(issue.watcher_users.join(', ')),
+        :short => true
+      } if Setting.plugin_redmine_telegram[:display_watchers] == 'yes'
+      
+      Mailer.speak(msg, channel, attachment, token)      
+
       issue_add_without_telegram(issue, to_users, cc_users)
     end
 
@@ -83,16 +114,16 @@ module TelegramMailerPatch
       users = to_users + cc_users
       journal_details = journal.visible_details(users.first)
       channel = channel_for_project issue.project
-      url = url_for_project issue.project
+      token = token_for_project issue.project
 
       
-      msg = "*[#{issue.project.name}]* _#{journal.user.to_s}_ updated [#{issue}](#{issue_url}) #{mentions journal.notes}"
+      msg = "*[#{iescape issue.project}]* _#{journal.user.to_s}_ updated [#{issue}](#{issue_url}) #{mentions journal.notes}"
       
       attachment = {}
       attachment[:text] = escape journal.notes if journal.notes
       attachment[:fields] = journal.details.map { |d| detail_to_field d }
       
-      Mailer.speak(msg, channel, attachment, url)
+      Mailer.speak(msg, channel, attachment, token)
       
       issue_edit_without_telegram(journal, to_users, cc_users)
     end
@@ -105,7 +136,7 @@ module TelegramMailerPatch
       Rails.application.routes.url_for(obj.event_url({:host => Setting.host_name, :protocol => Setting.protocol}))
     end
 
-    def url_for_project(proj)
+    def token_for_project(proj)
       return nil if proj.blank?
 
       cf = ProjectCustomField.find_by_name("Telegram BOT Token")
