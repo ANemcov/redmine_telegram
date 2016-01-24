@@ -43,7 +43,7 @@ module TelegramMailerPatch
       
       if attachment
         Rails.logger.info("Add attachments")
-        msg = msg +"\r\n"+attachment[:text]
+        msg = msg +"\r\n"+attachment[:text] if attachment[:text]
         Rails.logger.info("MSG with Attachments: #{msg}")
         for field_item in attachment[:fields] do
           Rails.logger.info("Add field")
