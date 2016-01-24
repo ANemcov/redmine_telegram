@@ -101,7 +101,7 @@ module TelegramMailerPatch
         :value => escape(issue.watcher_users.join(', ')),
         :short => true
       } if Setting.plugin_redmine_telegram[:display_watchers] == 'yes'
-      
+
       Mailer.speak(msg, channel, attachment, token)      
 
       issue_add_without_telegram(issue, to_users, cc_users)
@@ -143,7 +143,7 @@ module TelegramMailerPatch
 
       return [
         (proj.custom_value_for(cf).value rescue nil),
-        (url_for_project proj.parent),
+        (token_for_project proj.parent),
         Setting.plugin_redmine_telegram[:telegram_bot_token],
       ].find{|v| v.present?}
     end
