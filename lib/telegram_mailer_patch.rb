@@ -70,10 +70,10 @@ module TelegramMailerPatch
     end
 
     def issue_edit_with_telegram(journal, to_users, cc_users)
-      @issue = journal.journalized
-      @issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue, :anchor => "change-#{journal.id}")
-      @users = to_users + cc_users
-      @journal_details = journal.visible_details(@users.first)
+      issue = journal.journalized
+      issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue, :anchor => "change-#{journal.id}")
+      users = to_users + cc_users
+      journal_details = journal.visible_details(users.first)
       Rails.logger.info("Ready for MSG")
       msg = "*[#{issue.project.name}]* _#{journal.user.to_s}_ updated [#{issue.subject}](#{issue_url}) #{mentions journal.notes}"
 
