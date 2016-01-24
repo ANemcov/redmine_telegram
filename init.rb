@@ -1,5 +1,7 @@
 require 'redmine'
 
+require 'telegram_mailer_patch'
+
 require_dependency 'redmine_telegram/listener'
 
 Redmine::Plugin.register :redmine_telegram do
