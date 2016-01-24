@@ -2,11 +2,18 @@ require_dependency 'mailer'
 
 module TelegramMailerPatch
   def self.included(base) # :nodoc:
+    
+    base.extend(ClassMethods)
+
     base.send(:include, InstanceMethods)
 
     base.class_eval do
       alias_method_chain :deliver_issue_add, :telegram
     end
+  end
+  
+  module ClassMethods
+    
   end
   
   module InstanceMethods
