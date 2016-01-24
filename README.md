@@ -8,7 +8,7 @@ channel. Improvements are welcome! Just send a pull request.
 From your Redmine plugins directory, clone this repository as `redmine_telegram` (note
 the underscore!):
 
-    git clone https://github.com/sciyoshi/redmine-telegram.git redmine_telegram
+    git clone https://github.com/sciyoshi/redmine_telegram.git redmine_telegram
 
 You will also need the `httpclient` dependency, which can be installed by running
 
