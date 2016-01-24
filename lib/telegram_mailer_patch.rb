@@ -42,13 +42,14 @@ module TelegramMailerPatch
       # end
       
       if attachment
-        Rails.logger.info("Add attachments")
-        msg = msg +"\r\n"+attachment[:text] if attachment[:text]
-        Rails.logger.info("MSG with Attachments: #{msg}")
+        
+        msg = msg +"\r\n"
+        msg = msg +attachment[:text] if attachment[:text]
+        
         for field_item in attachment[:fields] do
-          Rails.logger.info("Add field")
+          
           msg = msg +"\r\n"+"> *"+field_item[:title]+":* "+field_item[:value]
-          Rails.logger.info("MSG with FIELDS: #{msg}")
+          
         end
       end
 
@@ -81,19 +82,15 @@ module TelegramMailerPatch
       issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue, :anchor => "change-#{journal.id}")
       users = to_users + cc_users
       journal_details = journal.visible_details(users.first)
-      
-      Rails.logger.info("Ready for MSG")
-      
-      msg = "*[#{issue.project.name}]* _#{journal.user.to_s}_ updated [#{issue.subject}](#{issue_url}) #{mentions journal.notes}"
-      
       channel = channel_for_project issue.project
       url = url_for_project issue.project
 
+      
+      msg = "*[#{issue.project.name}]* _#{journal.user.to_s}_ updated [#{issue}](#{issue_url}) #{mentions journal.notes}"
+      
       attachment = {}
       attachment[:text] = escape journal.notes if journal.notes
       attachment[:fields] = journal.details.map { |d| detail_to_field d }
-      
-      Rails.logger.info("TELEGRAM Edit Issue [#{issue.project.name} - #{issue.tracker.name} #{issue.id}] (#{issue.status.name}) #{issue.subject}")
       
       Mailer.speak(msg, channel, attachment, url)
       
