@@ -55,7 +55,7 @@ class TelegramListener < Redmine::Hook::Listener
 		attachment[:text] = escape journal.notes if journal.notes
 		attachment[:fields] = journal.details.map { |d| detail_to_field d }
 
-		Mailer.speak(msg, channel, attachment, url)
+		# Mailer.speak(msg, channel, attachment, url)
 	end
 
 	def model_changeset_scan_commit_for_issue_ids_pre_issue_update(context={})
