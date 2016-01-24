@@ -71,9 +71,13 @@ module TelegramMailerPatch
 
     def issue_edit_with_telegram(journal, to_users, cc_users)
       issue = journal.journalized
-      msg = "*[#{escape issue.project}]* _#{escape journal.user.to_s}_ updated [#{escape issue}](#{object_url issue}) #{mentions journal.notes}"
+      issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue, :anchor => "change-#{journal.id}")
+      users = to_users + cc_users
+      journal_details = journal.visible_details(@users.first)
+      Rails.logger.info("Ready for MSG")
+      msg = "*[#{issue.project.name}]* _#{journal.user.to_s}_ updated [#{issue.subject}](#{issue_url}) #{mentions journal.notes}"
 
-      Rails.logger.info("TELEGRAM Edit Issue [#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
+      Rails.logger.info("TELEGRAM Edit Issue [#{issue.project.name} - #{issue.tracker.name} #{issue.id}] (#{issue.status.name}) #{issue.subject}")
       issue_edit_without_telegram(journal, to_users, cc_users)
     end
 
