@@ -22,11 +22,11 @@ module TelegramMailerPatch
       token = Setting.plugin_redmine_telegram[:telegram_bot_token] if not token
       username = Setting.plugin_redmine_telegram[:username]
       icon = Setting.plugin_redmine_telegram[:icon]
-      Rails.logger.info("Token #{token}")
-      Rails.logger.info("username #{username}")
-      Rails.logger.info("icon #{icon}")
+      
       telegram_url = "https://api.telegram.org/bot#{token}/sendMessage"
+      
       Rails.logger.info("telegram_url #{telegram_url}")
+      
       params = {}
       
 
@@ -42,9 +42,13 @@ module TelegramMailerPatch
       # end
       
       if attachment
+        Rails.logger.info("Add attachments")
         msg = msg +"\r\n"+attachment[:text]
+        Rails.logger.info("MSG with Attachments: #{msg}")
         for field_item in attachment[:fields] do
+          Rails.logger.info("Add field")
           msg = msg +"\r\n"+"> *"+field_item[:title]+":* "+field_item[:value]
+          Rails.logger.info("MSG with FIELDS: #{msg}")
         end
       end
 
