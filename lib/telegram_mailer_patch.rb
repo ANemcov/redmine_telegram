@@ -56,7 +56,11 @@ module TelegramMailerPatch
       params[:text] = msg
       
       begin
-        client = HTTPClient.new
+        if Setting.plugin_redmine_telegram[:proxyurl].nil?
+          client = HTTPClient.new
+        else
+          client = HTTPClient.new(proxyurl)
+        end
         # client.ssl_config.cert_store.set_default_paths
         # client.ssl_config.ssl_version = "SSLv23"
         # client.post_async url, {:payload => params.to_json}
