@@ -40,3 +40,8 @@
 	<label for="settings_updated_include_details">Details in Issue Updates?</label>
 	<input type="checkbox" id="settings_updated_include_details" value="1" name="settings[updated_include_details]" <%= settings['updated_include_details'] == '1' ? 'checked="checked"' : '' %> />
 </p>
+
+<p>
+	<label for="settings_proxyurl">Proxy URL (ex. http://proxy.domain.com:8080 )</label>
+	<input type="text" id="settings_proxyurl" value="<%= settings['proxyurl'] %>" name="settings[proxyurl]" />
+</p>
