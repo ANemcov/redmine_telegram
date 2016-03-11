@@ -18,7 +18,9 @@ Redmine::Plugin.register :redmine_telegram do
 			'channel' => nil,
 			'icon' => 'https://raw.github.com/sciyoshi/redmine-slack/gh-pages/icon.png',
 			'username' => 'redmine',
-			'display_watchers' => 'no'
+			'display_watchers' => 'no',
+			'new_include_description' => 1,
+			'updated_include_description' => 1
 		},
 		:partial => 'settings/telegram_settings'
 end
