@@ -82,7 +82,7 @@ module TelegramMailerPatch
       channel = channel_for_project issue.project
       token = token_for_project issue.project
 
-      msg = "*[#{escape issue.project}]* _#{escape issue.author}_ created [#{escape issue}](#{issue_url})#{mentions issue.description if Setting.plugin_redmine_telegram[:new_include_description] == '1'}"
+      msg = "*[#{escape issue.project}]* _#{escape issue.author}_ created [#{escape issue}](#{issue_url})#{mentions issue.description if Setting.plugin_redmine_telegram[:auto_mentions] == '1'}"
       Rails.logger.info("TELEGRAM Add Issue [#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
       
       attachment = {}
@@ -123,13 +123,11 @@ module TelegramMailerPatch
       token = token_for_project issue.project
 
       
-      msg = "*[#{escape issue.project}]* _#{journal.user.to_s}_ updated [#{issue}](#{issue_url}) #{mentions journal.notes if Setting.plugin_redmine_telegram[:updated_include_description] == '1'}"
+      msg = "*[#{escape issue.project}]* _#{journal.user.to_s}_ updated [#{issue}](#{issue_url}) #{mentions journal.notes if Setting.plugin_redmine_telegram[:auto_mentions] == '1'}"
       
       attachment = {}
-      if Setting.plugin_redmine_telegram[:updated_include_description] == '1'
-        attachment[:text] = escape journal.notes if journal.notes
-        attachment[:fields] = journal.details.map { |d| detail_to_field d }
-      end
+      attachment[:text] = escape journal.notes if journal.notes if Setting.plugin_redmine_telegram[:updated_include_description] == '1'
+      attachment[:fields] = journal.details.map { |d| detail_to_field d }
       
       Mailer.speak(msg, channel, attachment, token)
       
