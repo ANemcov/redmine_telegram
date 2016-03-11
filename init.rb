@@ -21,7 +21,7 @@ Redmine::Plugin.register :redmine_telegram do
 			'display_watchers' => 'no',
 			'new_include_description' => 1,
 			'updated_include_description' => 1,
-			'proxy' => nil
+			'proxyurl' => nil
 		},
 		:partial => 'settings/telegram_settings'
 end
