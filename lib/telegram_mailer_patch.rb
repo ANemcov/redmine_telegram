@@ -22,6 +22,7 @@ module TelegramMailerPatch
       token = Setting.plugin_redmine_telegram[:telegram_bot_token] if not token
       username = Setting.plugin_redmine_telegram[:username]
       icon = Setting.plugin_redmine_telegram[:icon]
+      proxyurl = Setting.plugin_redmine_telegram[:proxyurl]
       
       telegram_url = "https://api.telegram.org/bot#{token}/sendMessage"
       
@@ -56,7 +57,7 @@ module TelegramMailerPatch
       params[:text] = msg
       
       begin
-        if Setting.plugin_redmine_telegram[:proxyurl].nil?
+        if Setting.plugin_redmine_telegram[:use_proxy] == '1'
           client = HTTPClient.new
         else
           client = HTTPClient.new(proxyurl)
