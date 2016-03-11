@@ -20,7 +20,8 @@ Redmine::Plugin.register :redmine_telegram do
 			'username' => 'redmine',
 			'display_watchers' => 'no',
 			'new_include_description' => 1,
-			'updated_include_description' => 1
+			'updated_include_description' => 1,
+			'proxy' => nil
 		},
 		:partial => 'settings/telegram_settings'
 end
