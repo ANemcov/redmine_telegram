@@ -126,7 +126,7 @@ module TelegramMailerPatch
       msg = "*[#{escape issue.project}]* _#{journal.user.to_s}_ updated [#{issue}](#{issue_url}) #{mentions journal.notes if Setting.plugin_redmine_telegram[:updated_include_description] == '1'}"
       
       attachment = {}
-      if Setting.plugin_redmine_telegram[:updated_include_details] == '1'
+      if Setting.plugin_redmine_telegram[:updated_include_description] == '1'
         attachment[:text] = escape journal.notes if journal.notes
         attachment[:fields] = journal.details.map { |d| detail_to_field d }
       end
