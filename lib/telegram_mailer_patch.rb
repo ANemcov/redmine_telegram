@@ -58,9 +58,9 @@ module TelegramMailerPatch
       
       begin
         if Setting.plugin_redmine_telegram[:use_proxy] == '1'
-          client = HTTPClient.new
-        else
           client = HTTPClient.new(proxyurl)
+        else
+          client = HTTPClient.new
         end
         # client.ssl_config.cert_store.set_default_paths
         # client.ssl_config.ssl_version = "SSLv23"
