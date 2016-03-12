@@ -8,7 +8,7 @@ Redmine::Plugin.register :redmine_telegram do
 	url 'https://github.com/ANemcov/redmine_telegram'
 	author_url 'http://cmd-q.ru'
 	description 'Telegram chat integration'
-	version '0.3'
+	version '0.4'
 
 	requires_redmine :version_or_higher => '0.8.0'
 
