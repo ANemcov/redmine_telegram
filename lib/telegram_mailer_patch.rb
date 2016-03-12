@@ -22,6 +22,7 @@ module TelegramMailerPatch
       token = Setting.plugin_redmine_telegram[:telegram_bot_token] if not token
       username = Setting.plugin_redmine_telegram[:username]
       icon = Setting.plugin_redmine_telegram[:icon]
+      proxyurl = Setting.plugin_redmine_telegram[:proxyurl]
       
       telegram_url = "https://api.telegram.org/bot#{token}/sendMessage"
       
@@ -56,7 +57,11 @@ module TelegramMailerPatch
       params[:text] = msg
       
       begin
-        client = HTTPClient.new
+        if Setting.plugin_redmine_telegram[:use_proxy] == '1'
+          client = HTTPClient.new(proxyurl)
+        else
+          client = HTTPClient.new
+        end
         # client.ssl_config.cert_store.set_default_paths
         # client.ssl_config.ssl_version = "SSLv23"
         # client.post_async url, {:payload => params.to_json}
@@ -77,10 +82,11 @@ module TelegramMailerPatch
       channel = channel_for_project issue.project
       token = token_for_project issue.project
 
-      msg = "*[#{escape issue.project}]* _#{escape issue.author}_ created [#{escape issue}](#{issue_url})#{mentions issue.description}"
+      msg = "*[#{escape issue.project}]* _#{escape issue.author}_ created [#{escape issue}](#{issue_url})#{mentions issue.description if Setting.plugin_redmine_telegram[:auto_mentions] == '1'}"
       Rails.logger.info("TELEGRAM Add Issue [#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
       
       attachment = {}
+      attachment[:text] = escape issue.description if issue.description if Setting.plugin_redmine_telegram[:new_include_description] == '1'
       attachment[:text] = escape issue.description if issue.description
       attachment[:fields] = [{
         :title => I18n.t("field_status"),
@@ -95,12 +101,12 @@ module TelegramMailerPatch
         :value => escape(issue.assigned_to.to_s),
         :short => true
       }]
-
       attachment[:fields] << {
         :title => I18n.t("field_watcher"),
         :value => escape(issue.watcher_users.join(', ')),
         :short => true
       } if Setting.plugin_redmine_telegram[:display_watchers] == 'yes'
+
 
       Mailer.speak(msg, channel, attachment, token)      
 
@@ -117,10 +123,10 @@ module TelegramMailerPatch
       token = token_for_project issue.project
 
       
-      msg = "*[#{escape issue.project}]* _#{journal.user.to_s}_ updated [#{issue}](#{issue_url}) #{mentions journal.notes}"
+      msg = "*[#{escape issue.project}]* _#{journal.user.to_s}_ updated [#{issue}](#{issue_url}) #{mentions journal.notes if Setting.plugin_redmine_telegram[:auto_mentions] == '1'}"
       
       attachment = {}
-      attachment[:text] = escape journal.notes if journal.notes
+      attachment[:text] = escape journal.notes if journal.notes if Setting.plugin_redmine_telegram[:updated_include_description] == '1'
       attachment[:fields] = journal.details.map { |d| detail_to_field d }
       
       Mailer.speak(msg, channel, attachment, token)
