@@ -87,7 +87,6 @@ module TelegramMailerPatch
       
       attachment = {}
       attachment[:text] = escape issue.description if issue.description if Setting.plugin_redmine_telegram[:new_include_description] == '1'
-      attachment[:text] = escape issue.description if issue.description
       attachment[:fields] = [{
         :title => I18n.t("field_status"),
         :value => escape(issue.status.to_s),
