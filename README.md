@@ -23,6 +23,20 @@ Start mmigration command
 Restart Redmine, and you should see the plugin show up in the Plugins page.
 Under the configuration options, set the "Telegram Bot Token" and default "Telegram Channel ID". For details see [Telegram BOT API](https://core.telegram.org/bots/API)
 
+## Update plugin
+
+Go to plugin girectory and pull last version
+	
+	git pull origin master
+
+Then start migration database to new version
+
+	rake redmine:plugins:migrate RAILS_ENV=production
+
+Last step - restaart your web-server to apply changes.
+
+Now you can use last version.
+
 ## Customized Routing
 
 You can also route messages to different channels on a per-project basis. To
