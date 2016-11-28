@@ -79,7 +79,6 @@ module TelegramMailerPatch
       
       issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue)
       users = to_users + cc_users
-      channel = channel_for_project issue.project
       token = token_for_project issue.project
 
       msg = "*[#{escape issue.project}]* _#{escape issue.author}_ created [#{escape issue}](#{issue_url})#{mentions issue.description if Setting.plugin_redmine_telegram[:auto_mentions] == '1'}"
@@ -106,8 +105,13 @@ module TelegramMailerPatch
         :short => true
       } if Setting.plugin_redmine_telegram[:display_watchers] == 'yes'
 
-
-      Mailer.speak(msg, channel, attachment, token)      
+      users.each do |user|
+        user.visible_custom_field_values.each do |telegram_chat_id|
+          if telegram_chat_id.custom_field.name.to_s == 'Telegram Channel'
+            Mailer.speak(msg, telegram_chat_id.value.to_i, attachment, token)
+          end
+        end
+      end
 
       issue_add_without_telegram(issue, to_users, cc_users)
     end
@@ -118,7 +122,6 @@ module TelegramMailerPatch
       issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue, :anchor => "change-#{journal.id}")
       users = to_users + cc_users
       journal_details = journal.visible_details(users.first)
-      channel = channel_for_project issue.project
       token = token_for_project issue.project
 
       
@@ -128,7 +131,13 @@ module TelegramMailerPatch
       attachment[:text] = escape journal.notes if journal.notes if Setting.plugin_redmine_telegram[:updated_include_description] == '1'
       attachment[:fields] = journal.details.map { |d| detail_to_field d }
       
-      Mailer.speak(msg, channel, attachment, token)
+      users.each do |user|
+        user.visible_custom_field_values.each do |telegram_chat_id|
+          if telegram_chat_id.custom_field.name.to_s == 'Telegram Channel'
+            Mailer.speak(msg, telegram_chat_id.value.to_i, attachment, token)
+          end
+        end
+      end
       
       issue_edit_without_telegram(journal, to_users, cc_users)
     end
@@ -151,22 +160,6 @@ module TelegramMailerPatch
         (token_for_project proj.parent),
         Setting.plugin_redmine_telegram[:telegram_bot_token],
       ].find{|v| v.present?}
-    end
-
-    def channel_for_project(proj)
-      return nil if proj.blank?
-
-      cf = ProjectCustomField.find_by_name("Telegram Channel")
-
-      val = [
-        (proj.custom_value_for(cf).value rescue nil),
-        (channel_for_project proj.parent),
-        Setting.plugin_redmine_telegram[:channel],
-      ].find{|v| v.present?}
-
-      # Channel name '-' is reserved for NOT notifying
-      return nil if val.to_s == '-'
-      val
     end
 
     def detail_to_field(detail)
