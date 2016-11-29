@@ -33,7 +33,8 @@ module TelegramMailerPatch
 
       params[:chat_id] = channel if channel
       params[:parse_mode] = "Markdown"
-      
+      params[:disable_web_page_preview] = 1
+
       # if icon and not icon.empty?
       #   if icon.start_with? ':'
       #     params[:icon_emoji] = icon
