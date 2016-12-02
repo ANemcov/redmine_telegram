@@ -1,7 +1,6 @@
-# Telegram chat plugin for Redmine
+# Telegram private messages plugin for Redmine
 
-This plugin posts updates to issues in your Redmine installation to a Telegram
-channel. Improvements are welcome! Just send a pull request.
+This plugin posts updates to issues in your Redmine installation to a Telegram. 
 
 ## Installation
 
