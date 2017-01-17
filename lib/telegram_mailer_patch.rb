@@ -74,6 +74,7 @@ module TelegramMailerPatch
       issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue)
       users = to_users + cc_users
       token = token_for_project issue.project
+      channel = channel_for_project issue.project
 
       msg = "<b>[#{escape issue.project}]</b>\n<a href='#{issue_url}'>#{escape issue}</a> #{mentions issue.description if Setting.plugin_redmine_telegram[:auto_mentions] == '1'}\n<b>#{escape issue.author}</b> #{l(:field_created_on)}\n"
       Rails.logger.info("TELEGRAM Add Issue [#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
@@ -101,13 +102,35 @@ module TelegramMailerPatch
 
       users.each do |user|
         next if user.id.to_i == issue.author_id.to_i
-        user.visible_custom_field_values.each do |telegram_chat_id|
-          if telegram_chat_id.custom_field.name.to_s == 'Telegram Channel' and telegram_chat_id.value.to_i != 0
-            Mailer.speak(msg, telegram_chat_id.value.to_i, attachment, token)
-            Rails.logger.info("SPEAK TO TELEGRAM #{telegram_chat_id.value.to_i} [#{issue.project} - #{issue} ##{issue_url}] #{user.inspect}")
+        telegram_chat_id = 0
+        telegram_disable_email = 0
+        user.visible_custom_field_values.each do |telegram_field|
+          if telegram_field.custom_field.name.to_s == 'Telegram Channel' and telegram_field.value.to_i != 0
+            telegram_chat_id = telegram_field.value.to_i
+          end
+          if telegram_field.custom_field.name.to_s == 'Telegram disable email'
+            telegram_disable_email = telegram_field.value.to_i
           end
         end
+        if telegram_chat_id != 0
+          Mailer.speak(msg, telegram_chat_id, attachment, token)
+          Rails.logger.info("SPEAK TO TELEGRAM #{telegram_chat_id} #{attachment} #{user.login}")
+        end
+        if telegram_disable_email != 0 and telegram_chat_id != 0
+          current_user = []
+          current_user << user
+          to_users = to_users - current_user
+          cc_users = cc_users - current_user
+        end
       end
+
+      if Setting.plugin_redmine_telegram[:priority_id_add].is_a? Integer
+        priority_id = Setting.plugin_redmine_telegram[:priority_id_add]
+      else
+        priority_id = 1
+      end
+
+      Mailer.speak(msg, channel, attachment, token) if issue.priority_id.to_i >= priority_id
 
       issue_add_without_telegram(issue, to_users, cc_users)
     end
@@ -119,6 +142,7 @@ module TelegramMailerPatch
       users = to_users + cc_users
       journal_details = journal.visible_details(users.first)
       token = token_for_project issue.project
+      channel = channel_for_project issue.project
 
       msg = "<b>[#{escape issue.project}]</b>\n<a href='#{issue_url}'>#{escape issue}</a> #{mentions journal.notes if Setting.plugin_redmine_telegram[:auto_mentions] == '1'}\n<b>#{journal.user.to_s}</b> #{l(:field_updated_on)}"
       Rails.logger.info("TELEGRAM Edit Issue [#{issue.project} - #{issue} ##{issue_url}]")
@@ -126,22 +150,44 @@ module TelegramMailerPatch
       attachment = {}
       attachment[:text] = "<b>#{l(:field_comments)}</b>: #{escape journal.notes}" if Setting.plugin_redmine_telegram[:updated_include_description] == '1' if journal.notes != ""
       attachment[:fields] = journal.details.map { |d| detail_to_field d }
-      
+
       users.each do |user|
         next if user.id.to_i == journal.user.id.to_i
-        user.visible_custom_field_values.each do |telegram_chat_id|
-          if telegram_chat_id.custom_field.name.to_s == 'Telegram Channel' and telegram_chat_id.value.to_i != 0
-            Mailer.speak(msg, telegram_chat_id.value.to_i, attachment, token)
-            Rails.logger.info("SPEAK TO TELEGRAM #{telegram_chat_id.value.to_i} #{attachment} #{user.inspect}")
+        telegram_chat_id = 0
+        telegram_disable_email = 0
+        user.visible_custom_field_values.each do |telegram_field|
+          if telegram_field.custom_field.name.to_s == 'Telegram Channel' and telegram_field.value.to_i != 0
+            telegram_chat_id = telegram_field.value.to_i
+          end
+          if telegram_field.custom_field.name.to_s == 'Telegram disable email'
+            telegram_disable_email = telegram_field.value.to_i
           end
         end
+        if telegram_chat_id != 0
+          Mailer.speak(msg, telegram_chat_id, attachment, token)
+          Rails.logger.info("SPEAK TO TELEGRAM #{telegram_chat_id} #{attachment} #{user.login}")
+        end
+        if telegram_disable_email != 0 and telegram_chat_id != 0
+          current_user = []
+          current_user << user
+          to_users = to_users - current_user
+          cc_users = cc_users - current_user
+        end
       end
-      
+
+      if Setting.plugin_redmine_telegram[:priority_id_edit].is_a? Integer
+        priority_id = Setting.plugin_redmine_telegram[:priority_id_edit]
+      else
+        priority_id = 1
+      end
+
+      Mailer.speak(msg, channel, attachment, token) if issue.priority_id.to_i >= priority_id
+
       issue_edit_without_telegram(journal, to_users, cc_users)
     end
 
     def escape(msg)
-      msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;").gsub("[", "\[").gsub("]", "\]")
+      msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;").gsub("[", "\[").gsub("]", "\]").gsub("<pre>", "<code>").gsub("</pre>", "</code>")
     end
 
     def object_url(obj)
@@ -158,6 +204,22 @@ module TelegramMailerPatch
         (token_for_project proj.parent),
         Setting.plugin_redmine_telegram[:telegram_bot_token],
       ].find{|v| v.present?}
+    end
+
+    def channel_for_project(proj)
+      return nil if proj.blank?
+
+      cf = ProjectCustomField.find_by_name("Telegram Channel")
+
+      val = [
+          (proj.custom_value_for(cf).value rescue nil),
+          (channel_for_project proj.parent),
+          Setting.plugin_redmine_telegram[:channel],
+      ].find{|v| v.present?}
+
+      # Channel name '-' is reserved for NOT notifying
+      return nil if val.to_s == '-'
+      val
     end
 
     def detail_to_field(detail)

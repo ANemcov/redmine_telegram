@@ -4,11 +4,11 @@ require 'telegram_mailer_patch'
 
 Redmine::Plugin.register :redmine_telegram do
 	name 'Redmine Telegram'
-	author 'Alex Nemtsov aka pythonchik'
-	url 'https://github.com/ANemcov/redmine_telegram'
-	author_url 'http://cmd-q.ru'
+	author 'Andry Kondratiev'
+	url 'https://github.com/massdest/redmine_telegram'
+	author_url 'https://github.com/massdest/redmine_telegram'
 	description 'Telegram chat integration'
-	version '0.4'
+	version '0.5'
 
 	requires_redmine :version_or_higher => '0.8.0'
 
