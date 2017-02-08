@@ -59,7 +59,7 @@ module TelegramMailerPatch
         client.send_timeout = 1
         client.receive_timeout = 1
         conn = client.post_async(telegram_url, params)
-        #Rails.logger.info("TELEGRAM SEND CODE: #{conn.pop.status_code}")
+        Rails.logger.info("TELEGRAM SEND CODE: #{conn.pop.status_code}")
       rescue
         #
       end
@@ -124,12 +124,13 @@ module TelegramMailerPatch
         end
       end
 
-      if Setting.plugin_redmine_telegram[:priority_id_add].is_a? Integer
-        priority_id = Setting.plugin_redmine_telegram[:priority_id_add]
+      if Setting.plugin_redmine_telegram[:priority_id_add].present?
+        priority_id = Setting.plugin_redmine_telegram[:priority_id_add].to_i
       else
         priority_id = 1
       end
 
+      Rails.logger.info("CHANNEL FOR PROJECT #{channel} #{token} #{priority_id}")
       Mailer.speak(msg, channel, attachment, token) if issue.priority_id.to_i >= priority_id
 
       issue_add_without_telegram(issue, to_users, cc_users)
@@ -175,12 +176,12 @@ module TelegramMailerPatch
         end
       end
 
-      if Setting.plugin_redmine_telegram[:priority_id_edit].is_a? Integer
-        priority_id = Setting.plugin_redmine_telegram[:priority_id_edit]
+      if Setting.plugin_redmine_telegram[:priority_id_edit].present?
+        priority_id = Setting.plugin_redmine_telegram[:priority_id_edit].to_i
       else
         priority_id = 1
       end
-
+      
       Mailer.speak(msg, channel, attachment, token) if issue.priority_id.to_i >= priority_id
 
       issue_edit_without_telegram(journal, to_users, cc_users)
