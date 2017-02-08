@@ -130,8 +130,10 @@ module TelegramMailerPatch
         priority_id = 1
       end
 
-      Rails.logger.info("CHANNEL FOR PROJECT #{channel} #{token} #{priority_id}")
-      Mailer.speak(msg, channel, attachment, token) if issue.priority_id.to_i >= priority_id
+      #Rails.logger.info("CHANNEL FOR PROJECT #{channel} #{token} #{priority_id}")
+      unless issue.tracker_id.to_s.include? Setting.plugin_redmine_telegram[:exclude_trackers].to_s
+        Mailer.speak(msg, channel, attachment, token) if issue.priority_id.to_i >= priority_id
+      end
 
       issue_add_without_telegram(issue, to_users, cc_users)
     end
@@ -181,8 +183,11 @@ module TelegramMailerPatch
       else
         priority_id = 1
       end
-      
-      Mailer.speak(msg, channel, attachment, token) if issue.priority_id.to_i >= priority_id
+
+      #Rails.logger.info("CHANNEL FOR PROJECT #{channel} #{token} #{priority_id}")
+      unless issue.tracker_id.to_s.include? Setting.plugin_redmine_telegram[:exclude_trackers].to_s
+        Mailer.speak(msg, channel, attachment, token) if issue.priority_id.to_i >= priority_id
+      end
 
       issue_edit_without_telegram(journal, to_users, cc_users)
     end
