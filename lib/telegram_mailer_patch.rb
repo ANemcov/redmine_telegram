@@ -197,7 +197,7 @@ module TelegramMailerPatch
     end
 
     def escape(msg)
-      msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;").gsub("[", "\[").gsub("]", "\]").gsub("<pre>", "<code>").gsub("</pre>", "</code>")
+      msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;").gsub("[", "\[").gsub("]", "\]").gsub("&lt;pre&gt;", "<code>").gsub("&lt;/pre&gt;", "</code>")
     end
 
     def object_url(obj)
