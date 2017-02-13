@@ -133,7 +133,7 @@ module TelegramMailerPatch
       end
 
       #Rails.logger.info("CHANNEL FOR PROJECT #{channel} #{token} #{priority_id}")
-      unless exclude_trackers.include?(issue.tracker_id.to_s) or exclude_users.include?(journal.user_id.to_s)
+      unless exclude_trackers.include?(issue.tracker_id.to_s) or exclude_users.include?(issue.author_id.to_s)
         Mailer.speak(msg, channel, attachment, token) if issue.priority_id.to_i >= priority_id
       end
 
