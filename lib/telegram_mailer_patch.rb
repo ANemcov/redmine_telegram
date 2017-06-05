@@ -16,9 +16,9 @@ module TelegramMailerPatch
   end
   
   module ClassMethods
-    
+
     def speak(msg, channel, attachment=nil, token=nil)
-      Rails.logger.info("TELEGRAM SPEAK #{msg} => #{channel}")
+      #Rails.logger.info("TELEGRAM SPEAK #{msg} => #{channel}")
       token = Setting.plugin_redmine_telegram[:telegram_bot_token] if not token
       username = Setting.plugin_redmine_telegram[:username]
       icon = Setting.plugin_redmine_telegram[:icon]
@@ -29,19 +29,10 @@ module TelegramMailerPatch
       Rails.logger.info("telegram_url #{telegram_url}")
       
       params = {}
-      
-
       params[:chat_id] = channel if channel
-      params[:parse_mode] = "Markdown"
-      
-      # if icon and not icon.empty?
-      #   if icon.start_with? ':'
-      #     params[:icon_emoji] = icon
-      #   else
-      #     params[:icon_url] = icon
-      #   end
-      # end
-      
+      params[:parse_mode] = "HTML"
+      params[:disable_web_page_preview] = 1
+
       if attachment
         
         msg = msg +"\r\n"
@@ -49,7 +40,7 @@ module TelegramMailerPatch
         
         for field_item in attachment[:fields] do
           
-          msg = msg +"\r\n"+"> *"+field_item[:title]+":* "+field_item[:value]
+          msg = msg +"\r\n"+"<b>"+field_item[:title]+":</b> "+field_item[:value]
           
         end
       end
@@ -65,9 +56,15 @@ module TelegramMailerPatch
         # client.ssl_config.cert_store.set_default_paths
         # client.ssl_config.ssl_version = "SSLv23"
         # client.post_async url, {:payload => params.to_json}
-        client.post_async(telegram_url, params)
+	client.connect_timeout = 1
+	client.send_timeout = 1
+	client.receive_timeout = 1
+	client.keep_alive_timeout = 1
+	client.ssl_config.timeout = 1
+        conn = client.post_async(telegram_url, params)
+        Rails.logger.info("TELEGRAM SEND CODE: #{conn.pop.status_code}")
       rescue
-        # Bury exception if connection error
+	Rails.logger.info("TELEGRAM SEND FAILED")
       end
     end
 
@@ -79,10 +76,12 @@ module TelegramMailerPatch
       
       issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue)
       users = to_users + cc_users
-      channel = channel_for_project issue.project
       token = token_for_project issue.project
+      channel = channel_for_project issue.project
+      exclude_trackers = Setting.plugin_redmine_telegram[:exclude_trackers].split(" ").map {|i| String(i) }
+      exclude_users = Setting.plugin_redmine_telegram[:exclude_users].split(" ").map {|i| String(i) }
 
-      msg = "*[#{escape issue.project}]* _#{escape issue.author}_ created [#{escape issue}](#{issue_url})#{mentions issue.description if Setting.plugin_redmine_telegram[:auto_mentions] == '1'}"
+      msg = "<b>[#{escape issue.project}]</b>\n<a href='#{issue_url}'>#{escape issue}</a> #{mentions issue.description if Setting.plugin_redmine_telegram[:auto_mentions] == '1'}\n<b>#{escape issue.author}</b> #{l(:field_created_on)}\n"
       Rails.logger.info("TELEGRAM Add Issue [#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] (#{issue.status.name}) #{issue.subject}")
       
       attachment = {}
@@ -106,8 +105,40 @@ module TelegramMailerPatch
         :short => true
       } if Setting.plugin_redmine_telegram[:display_watchers] == 'yes'
 
+      users.each do |user|
+        next if user.id.to_i == issue.author_id.to_i
+        telegram_chat_id = 0
+        telegram_disable_email = 0
+        user.visible_custom_field_values.each do |telegram_field|
+          if telegram_field.custom_field.name.to_s == 'Telegram Channel' and telegram_field.value.to_i != 0
+            telegram_chat_id = telegram_field.value.to_i
+          end
+          if telegram_field.custom_field.name.to_s == 'Telegram disable email'
+            telegram_disable_email = telegram_field.value.to_i
+          end
+        end
+        if telegram_chat_id != 0
+          Mailer.speak(msg, telegram_chat_id, attachment, token)
+          Rails.logger.info("SPEAK TO TELEGRAM #{telegram_chat_id} #{attachment} #{user.login}")
+        end
+        if telegram_disable_email != 0 and telegram_chat_id != 0
+          current_user = []
+          current_user << user
+          to_users = to_users - current_user
+          cc_users = cc_users - current_user
+        end
+      end
 
-      Mailer.speak(msg, channel, attachment, token)      
+      if Setting.plugin_redmine_telegram[:priority_id_add].present?
+        priority_id = Setting.plugin_redmine_telegram[:priority_id_add].to_i
+      else
+        priority_id = 1
+      end
+
+      #Rails.logger.info("CHANNEL FOR PROJECT #{channel} #{token} #{priority_id}")
+      unless exclude_trackers.include?(issue.tracker_id.to_s) or exclude_users.include?(issue.author_id.to_s)
+        Mailer.speak(msg, channel, attachment, token) if issue.priority_id.to_i >= priority_id
+      end
 
       issue_add_without_telegram(issue, to_users, cc_users)
     end
@@ -118,23 +149,58 @@ module TelegramMailerPatch
       issue_url = url_for(:controller => 'issues', :action => 'show', :id => issue, :anchor => "change-#{journal.id}")
       users = to_users + cc_users
       journal_details = journal.visible_details(users.first)
-      channel = channel_for_project issue.project
       token = token_for_project issue.project
+      channel = channel_for_project issue.project
+      exclude_trackers = Setting.plugin_redmine_telegram[:exclude_trackers].split(" ").map {|i| String(i) }
+      exclude_users = Setting.plugin_redmine_telegram[:exclude_users].split(" ").map {|i| String(i) }
 
-      
-      msg = "*[#{escape issue.project}]* _#{journal.user.to_s}_ updated [#{issue}](#{issue_url}) #{mentions journal.notes if Setting.plugin_redmine_telegram[:auto_mentions] == '1'}"
-      
+      msg = "<b>[#{escape issue.project}]</b>\n<a href='#{issue_url}'>#{escape issue}</a> #{mentions journal.notes if Setting.plugin_redmine_telegram[:auto_mentions] == '1'}\n<b>#{journal.user.to_s}</b> #{l(:field_updated_on)}"
+      Rails.logger.info("TELEGRAM Edit Issue [#{issue.project} - #{issue} ##{issue_url}]")
+
       attachment = {}
-      attachment[:text] = escape journal.notes if journal.notes if Setting.plugin_redmine_telegram[:updated_include_description] == '1'
+      attachment[:text] = "<b>#{l(:field_comments)}</b>: #{escape journal.notes}" if Setting.plugin_redmine_telegram[:updated_include_description] == '1' if journal.notes != ""
       attachment[:fields] = journal.details.map { |d| detail_to_field d }
-      
-      Mailer.speak(msg, channel, attachment, token)
-      
+
+      users.each do |user|
+        next if user.id.to_i == journal.user.id.to_i
+        telegram_chat_id = 0
+        telegram_disable_email = 0
+        user.visible_custom_field_values.each do |telegram_field|
+          if telegram_field.custom_field.name.to_s == 'Telegram Channel' and telegram_field.value.to_i != 0
+            telegram_chat_id = telegram_field.value.to_i
+          end
+          if telegram_field.custom_field.name.to_s == 'Telegram disable email'
+            telegram_disable_email = telegram_field.value.to_i
+          end
+        end
+        if telegram_chat_id != 0
+          Mailer.speak(msg, telegram_chat_id, attachment, token)
+          Rails.logger.info("SPEAK TO TELEGRAM #{telegram_chat_id} #{attachment} #{user.login}")
+        end
+        if telegram_disable_email != 0 and telegram_chat_id != 0
+          current_user = []
+          current_user << user
+          to_users = to_users - current_user
+          cc_users = cc_users - current_user
+        end
+      end
+
+      if Setting.plugin_redmine_telegram[:priority_id_edit].present?
+        priority_id = Setting.plugin_redmine_telegram[:priority_id_edit].to_i
+      else
+        priority_id = 1
+      end
+
+      #Rails.logger.info("CHANNEL FOR PROJECT #{channel} #{token} #{priority_id} #{journal.user_id.to_s} #{exclude_users.inspect} #{exclude_trackers.inspect}")
+      unless exclude_trackers.include?(issue.tracker_id.to_s) or exclude_users.include?(journal.user_id.to_s)
+        Mailer.speak(msg, channel, attachment, token) if issue.priority_id.to_i >= priority_id
+      end
+
       issue_edit_without_telegram(journal, to_users, cc_users)
     end
 
     def escape(msg)
-      msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;").gsub("[", "\[").gsub("]", "\]")
+      msg.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;").gsub("[", "\[").gsub("]", "\]").gsub("&lt;pre&gt;", "<code>").gsub("&lt;/pre&gt;", "</code>")
     end
 
     def object_url(obj)
@@ -159,9 +225,8 @@ module TelegramMailerPatch
       cf = ProjectCustomField.find_by_name("Telegram Channel")
 
       val = [
-        (proj.custom_value_for(cf).value rescue nil),
-        (channel_for_project proj.parent),
-        Setting.plugin_redmine_telegram[:channel],
+          (proj.custom_value_for(cf).value rescue nil),
+          Setting.plugin_redmine_telegram[:channel],
       ].find{|v| v.present?}
 
       # Channel name '-' is reserved for NOT notifying
@@ -210,13 +275,13 @@ module TelegramMailerPatch
         value = escape version.to_s
       when "attachment"
         attachment = Attachment.find(detail.prop_key) rescue nil
-        value = "<#{object_url attachment}|#{escape attachment.filename}>" if attachment
+        value = "#{object_url attachment}" if attachment
       when "parent"
         issue = Issue.find(detail.value) rescue nil
-        value = "<#{object_url issue}|#{escape issue}>" if issue
+        value = "#{object_url issue}" if issue
       end
 
-      value = "-" if value.empty?
+      value = " - " if value.empty?
 
       result = { :title => title, :value => value }
       result[:short] = true if short

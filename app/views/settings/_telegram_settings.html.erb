@@ -14,6 +14,31 @@
 </p>
 
 <p>
+	For private messages create <a href="/custom_fields/new?type=UserCustomField">User custom field</a> named "Telegram Channel" (without quotes).<br>
+	The channel can be entered per user <a href="/my/account">settings</a> for every user who wants to get notifications.
+</p>
+
+<p>
+	<label for="settings_priority_id_add">Priority id to add issue, more or equal (default 1)</label>
+	<input type="text" id="settings_priority_id_add" value="<%= settings['priority_id_add'] %>" name="settings[priority_id_add]" />
+</p>
+
+<p>
+	<label for="settings_priority_id_edit">Priority id to edit issue, more or equal (default 1)</label>
+	<input type="text" id="settings_priority_id_edit" value="<%= settings['priority_id_edit'] %>" name="settings[priority_id_edit]" />
+</p>
+
+<p>
+	<label for="settings_exclude_trackers">Ignore some tracker ids, via space, for ex:1 2 3</label>
+	<input type="text" id="settings_exclude_trackers" value="<%= settings['exclude_trackers'] %>" name="settings[exclude_trackers]" />
+</p>
+
+<p>
+  <label for="settings_exclude_users">Ignore some user ids, via space, for ex:1 2 3</label>
+  <input type="text" id="settings_exclude_users" value="<%= settings['exclude_users'] %>" name="settings[exclude_users]" />
+</p>
+
+<p>
 	<label for="settings_username">Icon</label>
 	<input type="text" id="settings_icon" value="<%= settings['icon'] %>" name="settings[icon]" />
 </p>
