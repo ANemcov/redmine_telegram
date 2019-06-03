@@ -16,6 +16,7 @@ Redmine::Plugin.register :redmine_telegram do
 		:default => {
       'callback_url' => 'https://api.telegram.org/bot',
       'channel' => nil,
+			'icon' => 'https://raw.github.com/sciyoshi/redmine-slack/gh-pages/icon.png',
       'username' => 'redmine',
       'display_watchers' => 'no',
       'auto_mentions' => 'yes',
