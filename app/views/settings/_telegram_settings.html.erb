@@ -19,7 +19,17 @@
 </p>
 
 <p>
-	<label for="settings_display_watchers">Display Watchers?</label>
+	<label for="settings_priority_id_add">Priority id to new issue, more or equal (default 1)</label>
+	<input type="text" id="settings_priority_id_add" value="<%= settings['priority_id_add'] %>" name="settings[priority_id_add]" />
+</p>
+
+<p>
+	<label for="settings_priority_id_edit">Priority id to update issue, more or equal (default 1)</label>
+	<input type="text" id="settings_priority_id_edit" value="<%= settings['priority_id_edit'] %>" name="settings[priority_id_edit]" />
+</p>
+
+<p>
+	<label for="settings_display_watchers">Display watchers?</label>
 	<select id="settings_display_watchers" value="<%= settings['display_watchers'] %>" name="settings[display_watchers]">
 		<option value="yes">Yes</option>
 		<option value="no" <%= settings['display_watchers'] != 'yes' ? %q(selected="selected") : '' %>>No</option>
@@ -27,12 +37,7 @@
 </p>
 
 <p>
-	<label for="settings_auto_mentions">Convert names to "mentions"</label>
-	<input type="checkbox" id="settings_auto_mentions" value="1" name="settings[auto_mentions]" <%= settings['auto_mentions'] == '1' ? 'checked="checked"' : '' %> />
-</p>
-
-<p>
-	<label for="settings_new_include_description">Details in New Issue?</label>
+	<label for="settings_new_include_description">Details in new issue?</label>
 	<input type="checkbox" id="settings_new_include_description" value="1" name="settings[new_include_description]" <%= settings['new_include_description'] == '1' ? 'checked="checked"' : '' %> />
 </p>
 
