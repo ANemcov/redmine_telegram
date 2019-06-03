@@ -16,12 +16,38 @@ You will also need the `httpclient` dependency, which can be installed by runnin
 
 from the plugin directory.
 
-Start mmigration command
+Start migration command
 
-	rake redmine:plugins:migrate RAILS_ENV=production
+	bundle exec rake redmine:plugins:migrate RAILS_ENV=production
 
 Restart Redmine, and you should see the plugin show up in the Plugins page.
 Under the configuration options, set the "Telegram Bot Token" and default "Telegram Channel ID". For details see [Telegram BOT API](https://core.telegram.org/bots/API)
+
+## Using
+
+### Create project custom field
+
+Create project custom field named "Telegram Channel" for ex: http://example.com/custom_fields/new?utf8=%E2%9C%93&type=ProjectCustomField (without quotes).
+
+![Custom field](images/redmine_telegram_customfield.png)
+
+### For individual project or projects
+
+Set channel into project settings
+
+![Project settings](images/redmine_telegram_project_settings.png)
+
+### Global for all projects
+
+For all projects - http://example.com/settings/plugin/redmine_telegram
+
+![Plugin settings](images/redmine_telegram_setting.png)
+
+### Exclude project
+
+To disable project from messaging use dash symbol, without quotes '-'
+
+![Disable messaging](images/redmine_telegram_project_disable.png)
 
 ## Update plugin
 
@@ -31,28 +57,22 @@ Go to plugin girectory and pull last version
 
 Then start migration database to new version
 
-	rake redmine:plugins:migrate RAILS_ENV=production
+	bundle exec rake redmine:plugins:migrate RAILS_ENV=production
 
-Last step - restaart your web-server to apply changes.
+Last step - restart your web-server to apply changes.
 
 Now you can use last version.
-
-## Customized Routing
-
-You can also route messages to different channels on a per-project basis. To
-do this, create a project custom field (Administration > Custom fields > Project)
-named `Telegram Channel`. If no custom channel is defined for a project, the parent
-project will be checked (or the default will be used). To prevent all notifications
-from being sent for a project, set the custom channel to `-`.
 
 ## Uninstall
 
 From Redmine plugin directory run command
 
-	rake redmine:plugins:migrate NAME=redmine_telegram VERSION=0 RAILS_ENV=production
+	bundle exec rake redmine:plugins:migrate NAME=redmine_telegram_global VERSION=0 RAILS_ENV=production
 
 After that restart Redmine.
 
-
-
 For more information, see http://www.redmine.org/projects/redmine/wiki/Plugins.
+
+
+
+
